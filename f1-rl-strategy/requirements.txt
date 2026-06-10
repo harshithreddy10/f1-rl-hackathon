@@ -13,4 +13,4 @@ scikit-learn
 # Visualization (Crucial for the demo and dashboard graphs)
 matplotlib
 
-pip install streamlit
+streamlit
