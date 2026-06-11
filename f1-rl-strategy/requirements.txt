@@ -1,16 +1,9 @@
-# F1 Telemetry & Data Processing
 fastf1
 pandas
 numpy
-
-# Reinforcement Learning Environment & Agent
-gymnasium
-stable-baselines3[extra]
-
-# Baseline Modeling (Tyre Degradation Regression)
 scikit-learn
-
-# Visualization (Crucial for the demo and dashboard graphs)
 matplotlib
-
 streamlit
+stable-baselines3
+gymnasium
+torch
