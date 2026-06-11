@@ -75,6 +75,12 @@ class F1PitEnv(gym.Env):
             new_compound      = COMPOUNDS[action - 1]
             pit_this_lap      = True
             time_this_lap    += PIT_TIME_LOSS
+            # penalise pitting too early (before lap 15)
+            if self.lap < 15:
+                time_this_lap += (15 - self.lap) * 2.0
+            # penalise pitting same compound
+            if new_compound == self.compound:
+                time_this_lap += 30.0
             self.compound     = new_compound
             self.tyre_life    = 1
             self.pit_count   += 1
@@ -108,12 +114,17 @@ class F1PitEnv(gym.Env):
         terminated = self.lap > TOTAL_LAPS
         truncated  = False
 
-        reward = -time_this_lap
+        reward = -time_this_lap / 78.0
+
         if terminated:
             if self.pit_count == 0:
-                reward -= 50.0
-            elif len(set(self.compounds_used)) >= 2:
-                reward += 10.0
+                reward -= 500.0
+            elif len(set(self.compounds_used)) < 2:
+                reward -= 300.0
+            elif self.pit_count > 3:
+                reward -= float(self.pit_count) * 10.0
+            else:
+                reward += 100.0
 
         if self.render_mode == "human":
             self._render()
