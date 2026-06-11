@@ -4,7 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys, os
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# ── Fix paths for Streamlit Cloud ────────────────────
+ROOT = os.path.dirname(os.path.abspath(__file__))
+os.chdir(ROOT)
+sys.path.insert(0, ROOT)
 
 st.set_page_config(page_title="F1 Pit Strategy RL", layout="wide", page_icon="🏎️")
 
@@ -133,9 +136,9 @@ def run_simulation(weather):
             break
 
     # DQN agent
-    dqn_env  = F1PitEnv(weather=weather)
-    model    = DQN.load("models/dqn_f1_agent")
-    obs, _   = dqn_env.reset()
+    dqn_env = F1PitEnv(weather=weather)
+    model   = DQN.load(os.path.join(ROOT, "models", "dqn_f1_agent"))
+    obs, _  = dqn_env.reset()
     while True:
         action, _ = model.predict(obs, deterministic=True)
         obs, _, term, _, _ = dqn_env.step(int(action))
@@ -214,8 +217,8 @@ if sim_ok:
                      color=RED,   alpha=0.5, label=t["rule_ahead"])
     ax2.plot(laps, gap, color=WHITE, linewidth=1.5)
     ax2.axhline(0, color="#555", linewidth=1)
-    ax2.set_xlabel(t["lap_label"],  color=WHITE)
-    ax2.set_ylabel(t["gap_label"],  color=WHITE)
+    ax2.set_xlabel(t["lap_label"], color=WHITE)
+    ax2.set_ylabel(t["gap_label"], color=WHITE)
     ax2.tick_params(colors=WHITE)
     ax2.legend(facecolor=CARD_BG, labelcolor=WHITE)
     ax2.grid(True, alpha=0.15, color="gray")
@@ -263,15 +266,15 @@ if sim_ok:
     st.divider()
     st.subheader(t["tyre_deg"])
     from models.tyre_model import load_model, predict_lap_time
-    tyre_model, le = load_model()
+    tyre_model, le = load_model(os.path.join(ROOT, "models", "tyre_model.pkl"))
     fig4, ax4 = plt.subplots(figsize=(14, 4), facecolor=DARK_BG)
     ax4.set_facecolor(CARD_BG)
     ages = np.arange(1, 55)
     for compound, color in {"SOFT": RED, "MEDIUM": YELLOW, "HARD": WHITE}.items():
         times = [predict_lap_time(tyre_model, le, compound, age, 40) for age in ages]
         ax4.plot(ages, times, color=color, linewidth=2.5, label=compound)
-    ax4.set_xlabel(t["tyre_age"],  color=WHITE)
-    ax4.set_ylabel(t["lap_time"],  color=WHITE)
+    ax4.set_xlabel(t["tyre_age"], color=WHITE)
+    ax4.set_ylabel(t["lap_time"], color=WHITE)
     ax4.tick_params(colors=WHITE)
     ax4.legend(facecolor=CARD_BG, labelcolor=WHITE)
     ax4.grid(True, alpha=0.2, color="gray")
