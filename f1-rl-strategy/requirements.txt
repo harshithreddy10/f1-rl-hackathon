@@ -7,3 +7,6 @@ streamlit
 stable-baselines3
 gymnasium
 torch
+google-generativeai
+anthropic
+requests
