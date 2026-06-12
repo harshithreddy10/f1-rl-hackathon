@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import sys, os
-from strategist.ai_strategist import get_ai_response
+
 
 # ── Fix paths for Streamlit Cloud ────────────────────
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -370,7 +370,7 @@ if sim_ok:
     )
 
     if st.button(t["ai_button"]) and question:
-        from utils.ai_strategist import get_ai_response
+        from strategist.ai_strategist import get_ai_response
         with st.spinner(t["ai_thinking"]):
             answer = get_ai_response(
                 question, ai_mode, api_key, ollama_model
