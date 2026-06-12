@@ -41,6 +41,17 @@ LANGUAGES = {
         "lap_time":     "Lap Time (s)",
         "gap_label":    "Gap (s)",
         "lap_label":    "Lap",
+        "ai_title":     "🤖 Ask the AI Strategist",
+        "ai_caption":   "Local AI via Ollama or Cloud AI with your own API key",
+        "ai_quick":     "Quick questions:",
+        "ai_q1":        "⏱️ When to pit?",
+        "ai_q2":        "🌧️ Rain strategy?",
+        "ai_q3":        "🏆 Why 1-stop wins?",
+        "ai_input":     "Ask anything about F1 strategy:",
+        "ai_placeholder":"e.g. Should I pit early or late at Monaco?",
+        "ai_button":    "🏎️ Ask Strategist",
+        "ai_answer":    "Answer",
+        "ai_thinking":  "Thinking...",
     },
     "हिंदी (Hindi)": {
         "title":        "🏎️ F1 पिट स्टॉप रणनीति — रीइन्फोर्समेंट लर्निंग",
@@ -70,6 +81,17 @@ LANGUAGES = {
         "lap_time":     "लैप टाइम (s)",
         "gap_label":    "अंतर (s)",
         "lap_label":    "लैप",
+        "ai_title":     "🤖 AI रणनीतिकार से पूछें",
+        "ai_caption":   "Ollama के साथ लोकल AI या अपनी API key के साथ क्लाउड AI",
+        "ai_quick":     "त्वरित प्रश्न:",
+        "ai_q1":        "⏱️ पिट कब करें?",
+        "ai_q2":        "🌧️ बारिश में रणनीति?",
+        "ai_q3":        "🏆 1-स्टॉप क्यों जीतता है?",
+        "ai_input":     "F1 रणनीति के बारे में कुछ भी पूछें:",
+        "ai_placeholder":"जैसे: मोनाको में जल्दी या देर से पिट करें?",
+        "ai_button":    "🏎️ रणनीतिकार से पूछें",
+        "ai_answer":    "उत्तर",
+        "ai_thinking":  "सोच रहा है...",
     },
     "తెలుగు (Telugu)": {
         "title":        "🏎️ F1 పిట్ స్టాప్ వ్యూహం — రీన్‌ఫోర్స్‌మెంట్ లెర్నింగ్",
@@ -99,6 +121,17 @@ LANGUAGES = {
         "lap_time":     "ల్యాప్ టైమ్ (s)",
         "gap_label":    "వ్యత్యాసం (s)",
         "lap_label":    "ల్యాప్",
+        "ai_title":     "🤖 AI వ్యూహకర్తను అడగండి",
+        "ai_caption":   "Ollama తో లోకల్ AI లేదా మీ API కీతో క్లౌడ్ AI",
+        "ai_quick":     "త్వరిత ప్రశ్నలు:",
+        "ai_q1":        "⏱️ పిట్ ఎప్పుడు?",
+        "ai_q2":        "🌧️ వర్షంలో వ్యూహం?",
+        "ai_q3":        "🏆 1-స్టాప్ ఎందుకు గెలుస్తుంది?",
+        "ai_input":     "F1 వ్యూహం గురించి ఏదైనా అడగండి:",
+        "ai_placeholder":"ఉదా: మొనాకోలో ముందు లేదా తర్వాత పిట్ చేయాలా?",
+        "ai_button":    "🏎️ వ్యూహకర్తను అడగండి",
+        "ai_answer":    "సమాధానం",
+        "ai_thinking":  "ఆలోచిస్తోంది...",
     }
 }
 
@@ -113,6 +146,30 @@ st.sidebar.success("✅ Tyre Model MAE: 0.776s")
 st.sidebar.success("✅ DQN Training: 200K steps")
 st.sidebar.info("🏁 Race: Monaco 2024 (78 laps)")
 
+# ── AI Backend Sidebar ────────────────────────────────
+st.sidebar.divider()
+st.sidebar.markdown("### 🤖 AI Strategist")
+ai_mode = st.sidebar.selectbox(
+    "AI Backend",
+    ["🖥️ Ollama (Local)", "🔑 Gemini (BYOK)", "🔑 Anthropic (BYOK)"]
+)
+
+api_key      = None
+ollama_model = "llama3"
+
+if ai_mode == "🖥️ Ollama (Local)":
+    ollama_model = st.sidebar.text_input("Ollama Model", value="llama3")
+    st.sidebar.info("Run `ollama serve` locally on port 11434")
+elif ai_mode == "🔑 Gemini (BYOK)":
+    api_key = st.sidebar.text_input(
+        "Gemini API Key", type="password", placeholder="AIza..."
+    )
+    st.sidebar.markdown("[🔗 Get free Gemini API key](https://aistudio.google.com/app/apikey)")
+elif ai_mode == "🔑 Anthropic (BYOK)":
+    api_key = st.sidebar.text_input(
+        "Anthropic API Key", type="password", placeholder="sk-ant-..."
+    )
+
 # ── Header ────────────────────────────────────────────
 st.title(t["title"])
 st.markdown(f"*{t['subtitle']}*")
@@ -125,7 +182,6 @@ def run_simulation(weather):
     from agents.rule_agent import RuleBasedAgent
     from stable_baselines3 import DQN
 
-    # Rule agent
     rule_env = F1PitEnv(weather=weather)
     agent    = RuleBasedAgent()
     obs, _   = rule_env.reset()
@@ -135,7 +191,6 @@ def run_simulation(weather):
         if term:
             break
 
-    # DQN agent
     dqn_env = F1PitEnv(weather=weather)
     model   = DQN.load(os.path.join(ROOT, "models", "dqn_f1_agent"))
     obs, _  = dqn_env.reset()
@@ -291,3 +346,32 @@ if sim_ok:
             t["dqn_col"]:  [f"{x:.2f}" for x in dqn_laps],
         })
         st.dataframe(df, use_container_width=True)
+
+    # ── AI Strategist ─────────────────────────────────
+    st.divider()
+    st.subheader(t["ai_title"])
+    st.caption(t["ai_caption"])
+
+    qc1, qc2, qc3 = st.columns(3)
+    q1 = qc1.button(t["ai_q1"])
+    q2 = qc2.button(t["ai_q2"])
+    q3 = qc3.button(t["ai_q3"])
+
+    default_q = ""
+    if q1: default_q = "When is the optimal lap to pit at Monaco 2024?"
+    if q2: default_q = "What is the best strategy if it rains at lap 40?"
+    if q3: default_q = "Why is 1-stop strategy better than 2-stop at Monaco?"
+
+    question = st.text_input(
+        t["ai_input"],
+        value=default_q,
+        placeholder=t["ai_placeholder"]
+    )
+
+    if st.button(t["ai_button"]) and question:
+        from utils.ai_strategist import get_ai_response
+        with st.spinner(t["ai_thinking"]):
+            answer = get_ai_response(
+                question, ai_mode, api_key, ollama_model
+            )
+        st.success(f"**{t['ai_answer']}:** {answer}")
