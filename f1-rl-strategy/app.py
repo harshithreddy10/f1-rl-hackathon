@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import sys, os
+from strategist.ai_strategist import get_ai_response
 
 # ── Fix paths for Streamlit Cloud ────────────────────
 ROOT = os.path.dirname(os.path.abspath(__file__))
